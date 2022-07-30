@@ -28,7 +28,7 @@ do
 
     echo "Patching $file < $patchFile"
     set +e
-    sed -i 's/\r//' "$nms/$file" > /dev/null
+    sed -i '' -e 's/\r//' "$nms/$file" > /dev/null
     set -e
 
     cp "$nms/$file" "$cb/$file"

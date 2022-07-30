@@ -146,7 +146,7 @@ case "$1" in
             if [[ ! -z "${2+x}" ]] ; then
                 NAME="$2"
             fi
-            (grep "alias $NAME=" "$RCPATH" > /dev/null) && (sed -i "s|alias $NAME=.*|alias $NAME='. $SOURCE'|g" "$RCPATH") || (echo "alias $NAME='. $SOURCE'" >> "$RCPATH")
+            (grep "alias $NAME=" "$RCPATH" > /dev/null) && (sed -i '' -e "s|alias $NAME=.*|alias $NAME='. $SOURCE'|g" "$RCPATH") || (echo "alias $NAME='. $SOURCE'" >> "$RCPATH")
             alias "$NAME=. $SOURCE"
             echo "You can now just type '$NAME' at any time to access the paper tool."
         else

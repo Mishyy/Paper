@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+export JAVA_VERSION=1.8
+
 gitcmd="git -c commit.gpgsign=false"
 
 color() {
