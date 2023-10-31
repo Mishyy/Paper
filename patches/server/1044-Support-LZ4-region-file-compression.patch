@@ -1,0 +1,59 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mitchell <13673076+mishyy@users.noreply.github.com>
+Date: Tue, 31 Oct 2023 17:40:51 +1000
+Subject: [PATCH] Support LZ4 region file compression
+
+Signed-off-by: Mitchell <13673076+mishyy@users.noreply.github.com>
+
+diff --git a/build.gradle.kts b/build.gradle.kts
+index 79beac737c17412913983614bd478d33e3c6ed58..3f489dad29aec15d60503d906ee41d731eb2bc30 100644
+--- a/build.gradle.kts
++++ b/build.gradle.kts
+@@ -46,6 +46,7 @@ dependencies {
+         isTransitive = false
+     }
+     // Paper end
++    implementation("org.lz4:lz4-java:1.8.0") // Paper - Support lz4 compression
+ 
+     runtimeOnly("org.apache.maven:maven-resolver-provider:3.8.5")
+     runtimeOnly("org.apache.maven.resolver:maven-resolver-connector-basic:1.7.3")
+diff --git a/src/main/java/io/papermc/paper/configuration/GlobalConfiguration.java b/src/main/java/io/papermc/paper/configuration/GlobalConfiguration.java
+index a6f58b3457b7477015c5c6d969e7d83017dd3fa1..95b40ec46aa19f62f00740dbd249a35b095e5a8f 100644
+--- a/src/main/java/io/papermc/paper/configuration/GlobalConfiguration.java
++++ b/src/main/java/io/papermc/paper/configuration/GlobalConfiguration.java
+@@ -186,7 +186,8 @@ public class GlobalConfiguration extends ConfigurationPart {
+         public enum CompressionFormat {
+             GZIP,
+             ZLIB,
+-            NONE
++            NONE,
++            LZ4 // Paper - Support lz4 compression
+         }
+     }
+ 
+diff --git a/src/main/java/net/minecraft/world/level/chunk/storage/RegionFileVersion.java b/src/main/java/net/minecraft/world/level/chunk/storage/RegionFileVersion.java
+index ee27a553b426d3e1e1317bbeb39a3c2d46520e59..660bbe12b71f248fe11687ca5e9547d1f4180ca2 100644
+--- a/src/main/java/net/minecraft/world/level/chunk/storage/RegionFileVersion.java
++++ b/src/main/java/net/minecraft/world/level/chunk/storage/RegionFileVersion.java
+@@ -30,6 +30,13 @@ public class RegionFileVersion {
+     }, (stream) -> {
+         return stream;
+     }));
++    // Paper start - Support lz4 compression
++    public static final RegionFileVersion VERSION_ZL4 = register(new RegionFileVersion(127, (stream) -> {
++        return new FastBufferedInputStream(new net.jpountz.lz4.LZ4BlockInputStream(stream));
++    }, (stream) -> {
++        return new BufferedOutputStream(new net.jpountz.lz4.LZ4BlockOutputStream(stream));
++    }));
++    // Paper end
+ 
+     // Paper Start - Configurable region compression format
+     public static RegionFileVersion getCompressionFormat() {
+@@ -37,6 +44,7 @@ public class RegionFileVersion {
+             case GZIP -> VERSION_GZIP;
+             case ZLIB -> VERSION_DEFLATE;
+             case NONE -> VERSION_NONE;
++            case LZ4 -> VERSION_ZL4;
+         };
+     }
+     // Paper End
